@@ -24,10 +24,10 @@ struct ContentView: View {
                 .foregroundColor(.secondary)
 
             VStack(alignment: .leading, spacing: 12) {
-                FeatureRow(icon: "bell.fill", title: "Stand-up Reminders", description: "Customizable break reminders - set your preferred interval")
+                FeatureRow(icon: "bell.fill", title: "Stand-up Reminders", description: "Customizable break reminders")
                 FeatureRow(icon: "list.bullet", title: "Daily Todo List", description: "Manage your tasks with priority sorting")
                 FeatureRow(icon: "menubar.rectangle", title: "Menu Bar Access", description: "Quick access from your menu bar")
-                FeatureRow(icon: "gearshape.fill", title: "Customizable Settings", description: "Configure reminder intervals and menu bar icons")
+                FeatureRow(icon: "gearshape.fill", title: "Customizable Settings", description: "Configurable base on your need")
             }
             .padding()
             .background(Color(NSColor.controlBackgroundColor))
