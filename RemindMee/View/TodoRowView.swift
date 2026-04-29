@@ -31,8 +31,9 @@ struct TodoRowView: View {
         }) {
           Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
             .foregroundColor(todo.isCompleted ? .green : .secondary)
+            .font(.system(size: 15, weight: .semibold))
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(GlassIconButtonStyle(tint: todo.isCompleted ? .green : .gray))
 
         // Priority indicator
         Rectangle()
@@ -72,27 +73,35 @@ struct TodoRowView: View {
           startEditing()
         }) {
           Image(systemName: "pencil")
-            .foregroundColor(.blue)
-            .font(.caption)
+            .font(.system(size: 12, weight: .semibold))
         }
-        .buttonStyle(PlainButtonStyle())
-        .opacity(0.7)
+        .buttonStyle(GlassIconButtonStyle(tint: .blue))
 
         Button(action: {
           todoManager.deleteTodo(todo)
         }) {
           Image(systemName: "trash")
-            .foregroundColor(.red)
-            .font(.caption)
+            .font(.system(size: 12, weight: .semibold))
         }
-        .buttonStyle(PlainButtonStyle())
-        .opacity(0.7)
+        .buttonStyle(GlassIconButtonStyle(tint: .red))
       }
     }
     .padding(.vertical, 6)
     .padding(.horizontal, 8)
-    .background(backgroundColorForPriority)
-    .cornerRadius(6)
+    .background(
+      RoundedRectangle(cornerRadius: 8, style: .continuous)
+        .fill(.ultraThinMaterial)
+        .overlay(
+          RoundedRectangle(cornerRadius: 8, style: .continuous)
+            .fill(backgroundColorForPriority)
+            .opacity(todo.isCompleted ? 0.35 : 1.0)
+        )
+        .overlay(
+          RoundedRectangle(cornerRadius: 8, style: .continuous)
+            .stroke(Color.white.opacity(0.25), lineWidth: 1)
+        )
+    )
+    .shadow(color: .black.opacity(0.06), radius: 4, y: 1)
   }
 
   private var editingView: some View {
@@ -113,14 +122,8 @@ struct TodoRowView: View {
           showingDatePicker.toggle()
         }) {
           Text(editDueDate == nil ? "Due Date" : "✓ Due")
-            .font(.caption)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(editDueDate == nil ? Color.orange : Color.green)
-            .foregroundColor(.white)
-            .cornerRadius(4)
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(GlassPillButtonStyle(tint: editDueDate == nil ? .orange : .green))
 
         if editDueDate != nil {
           Button(action: {
@@ -128,14 +131,8 @@ struct TodoRowView: View {
             showingDatePicker = false
           }) {
             Text("✕")
-              .font(.caption)
-              .padding(.horizontal, 8)
-              .padding(.vertical, 4)
-              .background(Color.red)
-              .foregroundColor(.white)
-              .cornerRadius(4)
           }
-          .buttonStyle(PlainButtonStyle())
+          .buttonStyle(GlassPillButtonStyle(tint: .red))
         }
 
         Spacer()
@@ -145,31 +142,17 @@ struct TodoRowView: View {
           showingDatePicker = false
         }) {
           Text("Cancel")
-            .font(.caption)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color.gray)
-            .foregroundColor(.white)
-            .cornerRadius(4)
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(GlassPillButtonStyle(tint: .gray))
 
         Button(action: {
           saveChanges()
         }) {
           Text("Save")
-            .font(.caption)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(
-              editTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                ? Color.gray.opacity(0.5) : Color.blue
-            )
-            .foregroundColor(.white)
-            .cornerRadius(4)
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(GlassPillButtonStyle(tint: .blue))
         .disabled(editTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        .opacity(editTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1.0)
       }
 
       if showingDatePicker {
@@ -184,8 +167,15 @@ struct TodoRowView: View {
       }
     }
     .padding(8)
-    .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
-    .cornerRadius(6)
+    .background(
+      RoundedRectangle(cornerRadius: 8, style: .continuous)
+        .fill(.ultraThinMaterial)
+        .overlay(
+          RoundedRectangle(cornerRadius: 8, style: .continuous)
+            .stroke(Color.white.opacity(0.25), lineWidth: 1)
+        )
+    )
+    .shadow(color: .black.opacity(0.06), radius: 4, y: 1)
   }
 
   private func startEditing() {
@@ -221,6 +211,48 @@ struct TodoRowView: View {
     case .medium: return Color.orange.opacity(opacity)
     case .low: return Color.green.opacity(opacity)
     }
+  }
+}
+
+private struct GlassPillButtonStyle: ButtonStyle {
+  let tint: Color
+
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+      .font(.caption)
+      .padding(.horizontal, 10)
+      .padding(.vertical, 5)
+      .foregroundColor(.white)
+      .background(
+        Capsule()
+          .fill(tint.opacity(configuration.isPressed ? 0.45 : 0.6))
+          .overlay(
+            Capsule()
+              .stroke(Color.white.opacity(0.3), lineWidth: 1)
+          )
+      )
+      .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+      .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+  }
+}
+
+private struct GlassIconButtonStyle: ButtonStyle {
+  let tint: Color
+
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+      .foregroundColor(tint.opacity(0.95))
+      .padding(5)
+      .background(
+        Circle()
+          .fill(.ultraThinMaterial)
+          .overlay(
+            Circle()
+              .stroke(Color.white.opacity(0.22), lineWidth: 1)
+          )
+      )
+      .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+      .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
   }
 }
 
