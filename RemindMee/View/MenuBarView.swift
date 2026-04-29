@@ -268,7 +268,7 @@ struct MenuBarView: View {
         endPoint: .bottomTrailing
       )
     )
-    .frame(width: 350)
+    .frame(width: 370)
   }
 
   private func openSettingsWindow() {

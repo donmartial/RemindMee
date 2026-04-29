@@ -87,6 +87,25 @@ struct SettingsView: View {
                   .toggleStyle(.switch)
               }
 
+              Divider()
+
+              // Smart break suggestions toggle
+              HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                  Text("Smart Break Suggestions")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                  Text("Use rotating activity ideas in reminder messages")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Toggle("", isOn: $settingsManager.enableSmartBreaks)
+                  .toggleStyle(.switch)
+              }
+
               // Active reminder info
               if reminderManager.isReminderActive {
                 HStack {
