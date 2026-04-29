@@ -55,12 +55,43 @@ struct TodoItem: Identifiable, Codable {
     var priority: Priority
     var isCompleted: Bool
     var createdAt: Date
+    var completedAt: Date?
+    var dueDate: Date?
     
-    init(title: String, priority: Priority) {
+    init(title: String, priority: Priority, dueDate: Date? = nil) {
         self.id = UUID()
         self.title = title
         self.priority = priority
         self.isCompleted = false
         self.createdAt = Date()
+        self.completedAt = nil
+        self.dueDate = dueDate
+    }
+    
+    var isOverdue: Bool {
+        guard let dueDate = dueDate, !isCompleted else { return false }
+        return dueDate < Date()
+    }
+    
+    var isDueToday: Bool {
+        guard let dueDate = dueDate else { return false }
+        return Calendar.current.isDateInToday(dueDate)
+    }
+    
+    var dueDateFormatted: String? {
+        guard let dueDate = dueDate else { return nil }
+        
+        let formatter = DateFormatter()
+        if Calendar.current.isDateInToday(dueDate) {
+            formatter.dateStyle = .none
+            formatter.timeStyle = .short
+            return "Today \(formatter.string(from: dueDate))"
+        } else if Calendar.current.isDateInTomorrow(dueDate) {
+            return "Tomorrow"
+        } else {
+            formatter.dateStyle = .short
+            formatter.timeStyle = .none
+            return formatter.string(from: dueDate)
+        }
     }
 }

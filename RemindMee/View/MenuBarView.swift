@@ -15,6 +15,8 @@ struct MenuBarView: View {
     @State private var showingAddTodo = false
     @State private var newTodoTitle = ""
     @State private var newTodoPriority = Priority.medium
+    @State private var newTodoDueDate: Date? = nil
+    @State private var showingDueDatePicker = false
 
     @Environment(\.openWindow) private var openWindow
 
@@ -117,11 +119,45 @@ struct MenuBarView: View {
             // Add new todo section
             VStack(spacing: 8) {
                 HStack {
-                    Text("Today's Tasks")
+                    Text("Tasks")
                         .font(.subheadline)
                         .fontWeight(.medium)
+                    
+                    if !todoManager.todaysTasks.isEmpty {
+                        Button(action: {
+                            todoManager.toggleShowCompleted()
+                        }) {
+                            Text(todoManager.showCompletedTasks ? "Hide Done" : "Show Done")
+                                .font(.caption)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.green.opacity(0.8))
+                                .foregroundColor(.white)
+                                .cornerRadius(3)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
 
                     Spacer()
+                    
+                    // Bulk actions menu
+                    if !todoManager.todaysTasks.isEmpty {
+                        Menu {
+                            Button("Mark All Done") {
+                                todoManager.markAllAsCompleted()
+                            }
+                            .keyboardShortcut("a", modifiers: [.command, .shift])
+                            
+                            Button("Clear Completed") {
+                                todoManager.deleteAllCompleted()
+                            }
+                            .disabled(todoManager.completedTodayCount == 0)
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                                .foregroundColor(.secondary)
+                        }
+                        .menuStyle(BorderlessButtonMenuStyle())
+                    }
 
                     Button(action: {
                         showingAddTodo.toggle()
@@ -139,7 +175,7 @@ struct MenuBarView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
 
                         HStack {
-                            Picker("Priority", selection: $newTodoPriority) {
+                            Picker("", selection: $newTodoPriority) {
                                 ForEach(Priority.allCases, id: \.self) { priority in
                                     Text("\(priority.emoji) \(priority.displayName)")
                                         .tag(priority)
@@ -147,23 +183,80 @@ struct MenuBarView: View {
                             }
                             .pickerStyle(MenuPickerStyle())
 
-                            Spacer()
-
-                            Button("Cancel") {
-                                showingAddTodo = false
-                                newTodoTitle = ""
+                            Button(action: {
+                                showingDueDatePicker.toggle()
+                            }) {
+                                Text(newTodoDueDate == nil ? "Due Date" : "✓ Due")
+                                    .font(.caption)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(newTodoDueDate == nil ? Color.orange : Color.green)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(4)
                             }
                             .buttonStyle(PlainButtonStyle())
 
-                            Button("Add") {
-                                if !newTodoTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    todoManager.addTodo(title: newTodoTitle, priority: newTodoPriority)
-                                    newTodoTitle = ""
-                                    showingAddTodo = false
+                            if newTodoDueDate != nil {
+                                Button(action: {
+                                    newTodoDueDate = nil
+                                    showingDueDatePicker = false
+                                }) {
+                                    Text("✕")
+                                        .font(.caption)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.red)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(4)
                                 }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+
+                            Spacer()
+
+                            Button(action: {
+                                showingAddTodo = false
+                                newTodoTitle = ""
+                                newTodoDueDate = nil
+                                showingDueDatePicker = false
+                            }) {
+                                Text("Cancel")
+                                    .font(.caption)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.gray)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(4)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+
+                            Button(action: {
+                                if !newTodoTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                    todoManager.addTodo(title: newTodoTitle, priority: newTodoPriority, dueDate: newTodoDueDate)
+                                    newTodoTitle = ""
+                                    newTodoDueDate = nil
+                                    showingAddTodo = false
+                                    showingDueDatePicker = false
+                                }
+                            }) {
+                                Text("Add")
+                                    .font(.caption)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(newTodoTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray.opacity(0.5) : Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(4)
                             }
                             .buttonStyle(PlainButtonStyle())
                             .disabled(newTodoTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        }
+                        
+                        if showingDueDatePicker {
+                            DatePicker("Due Date", selection: Binding(
+                                get: { newTodoDueDate ?? Date() },
+                                set: { newTodoDueDate = $0 }
+                            ), displayedComponents: [.date, .hourAndMinute])
+                            .datePickerStyle(CompactDatePickerStyle())
                         }
                     }
                     .padding(8)
@@ -200,7 +293,7 @@ struct MenuBarView: View {
             }
             .frame(maxHeight: 300)
         }
-        .frame(width: 320)
+        .frame(width: 350)
     }
 
     private func openSettingsWindow() {
