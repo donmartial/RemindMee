@@ -81,9 +81,9 @@ class StandUpReminderManager: ObservableObject {
             print("Notifications disabled in settings")
             return
         }
-        
+
         let content = UNMutableNotificationContent()
-        
+
         // Use smart break suggestions if enabled
         if settingsManager?.enableSmartBreaks == true {
             let suggestion = BreakSuggestion.randomSuggestion(for: .shortBreak)
@@ -115,7 +115,7 @@ class StandUpReminderManager: ObservableObject {
             print("Stand-up reminder suppressed due to focus mode")
             return
         }
-        
+
         sendStandUpNotification()
     }
 }

@@ -10,14 +10,12 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var settingsManager: SettingsManager
     @ObservedObject var reminderManager: StandUpReminderManager
-    @ObservedObject var focusSessionManager: FocusSessionManager
     @ObservedObject var doNotDisturbManager: DoNotDisturbManager
     
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(spacing: 20) {
-                    
                     // Stand-up Reminder Settings
                     GroupBox {
                         VStack(spacing: 16) {
@@ -288,7 +286,6 @@ struct SettingsView: View {
     SettingsView(
         settingsManager: SettingsManager(),
         reminderManager: StandUpReminderManager(),
-        focusSessionManager: FocusSessionManager(),
         doNotDisturbManager: DoNotDisturbManager()
     )
 }

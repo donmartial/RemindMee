@@ -11,7 +11,6 @@ struct MenuBarView: View {
     @ObservedObject var todoManager: TodoManager
     @ObservedObject var reminderManager: StandUpReminderManager
     @ObservedObject var settingsManager: SettingsManager
-    @ObservedObject var focusSessionManager: FocusSessionManager
     @ObservedObject var doNotDisturbManager: DoNotDisturbManager
     @State private var showingAddTodo = false
     @State private var newTodoTitle = ""
@@ -97,52 +96,6 @@ struct MenuBarView: View {
                     .buttonStyle(PlainButtonStyle())
                 }
 
-                // Focus session controls
-                if focusSessionManager.isSessionActive {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Focus Session")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-
-                            Text("Time: \(focusSessionManager.formattedRemainingTime)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-
-                        Spacer()
-
-                        Button(action: {
-                            if focusSessionManager.isPaused {
-                                focusSessionManager.resumeFocusSession()
-                            } else {
-                                focusSessionManager.pauseFocusSession()
-                            }
-                        }) {
-                            Text(focusSessionManager.isPaused ? "Resume" : "Pause")
-                                .font(.caption)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(focusSessionManager.isPaused ? Color.green : Color.orange)
-                                .foregroundColor(.white)
-                                .cornerRadius(4)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-
-                        Button(action: {
-                            focusSessionManager.stopFocusSession()
-                        }) {
-                            Text("Stop")
-                                .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(reminderManager.isReminderActive ? Color.red : Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(4)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            }
                 // Do Not Disturb status
                 if doNotDisturbManager.isCurrentlyInFocus {
                     HStack {
@@ -169,8 +122,6 @@ struct MenuBarView: View {
                         .fontWeight(.medium)
 
                     Spacer()
-
-
 
                     Button(action: {
                         showingAddTodo.toggle()
@@ -250,29 +201,6 @@ struct MenuBarView: View {
             .frame(maxHeight: 300)
         }
         .frame(width: 320)
-        .overlay(
-            // Break suggestion overlay
-            Group {
-                if focusSessionManager.showingBreakSuggestion,
-                   let suggestion = focusSessionManager.currentBreakSuggestion {
-                    Color.black.opacity(0.3)
-                        .ignoresSafeArea()
-
-                    BreakSuggestionView(
-                        suggestion: suggestion,
-                        onDismiss: {
-                            focusSessionManager.dismissBreakSuggestion()
-                        },
-                        onStartBreak: {
-                            // Could start a break timer here in the future
-                            focusSessionManager.dismissBreakSuggestion()
-                        }
-                    )
-                    .transition(.scale.combined(with: .opacity))
-                }
-            }
-            .animation(.easeInOut(duration: 0.3), value: focusSessionManager.showingBreakSuggestion)
-        )
     }
 
     private func openSettingsWindow() {
@@ -308,7 +236,6 @@ struct MenuBarView: View {
         todoManager: TodoManager(),
         reminderManager: StandUpReminderManager(),
         settingsManager: SettingsManager(),
-        focusSessionManager: FocusSessionManager(),
         doNotDisturbManager: DoNotDisturbManager()
     )
 }

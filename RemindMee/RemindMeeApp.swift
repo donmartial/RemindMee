@@ -13,7 +13,6 @@ struct RemindMeeApp: App {
     @StateObject private var settingsManager = SettingsManager()
     @StateObject private var todoManager = TodoManager()
     @StateObject private var reminderManager = StandUpReminderManager()
-    @StateObject private var focusSessionManager = FocusSessionManager()
     @StateObject private var doNotDisturbManager = DoNotDisturbManager()
     
     var body: some Scene {
@@ -22,13 +21,11 @@ struct RemindMeeApp: App {
                 todoManager: todoManager,
                 reminderManager: reminderManager,
                 settingsManager: settingsManager,
-                focusSessionManager: focusSessionManager,
                 doNotDisturbManager: doNotDisturbManager
             )
             .onAppear {
                 // Configure managers with dependencies when view appears
                 reminderManager.configure(with: settingsManager, doNotDisturbManager: doNotDisturbManager)
-                focusSessionManager.configure(with: settingsManager)
             }
         }
         .menuBarExtraStyle(.window)
@@ -38,7 +35,6 @@ struct RemindMeeApp: App {
             SettingsView(
                 settingsManager: settingsManager, 
                 reminderManager: reminderManager,
-                focusSessionManager: focusSessionManager,
                 doNotDisturbManager: doNotDisturbManager
             )
             .onAppear {
